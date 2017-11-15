@@ -1,0 +1,66 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "gluster-pvc-pod",
+    "creationTimestamp": null,
+    "labels": {
+      "name": "gluster-pvc-pod"
+    }
+  },
+  "spec": {
+    "volumes": 
+    {
+       "name": "gluster-vol1",
+       "persistentVolumeClaim":
+       {
+          "claimName": "gluster-claim"
+       }
+    },
+    "containers": [
+      {
+        "name": "gluster-pvc-pod",
+        "image": "registrya.example.com:5000/rhscl/mysql-56-rhel7:latest",
+        "ports": [
+            {
+                "name": "port1",
+                "containerPort": 3306,
+                "protocol": "TCP"
+            },
+            {
+                "name": "port2",
+                "containerPort": 3307,
+                "protocol": "TCP"
+            }
+        ],
+        "env": [
+            {
+                "name": "MYSQL_USER",
+                "value": "user28O"
+            },
+            {
+                "name": "MYSQL_PASSWORD",
+                "value": "W3T07KAn25XCmjRy"
+            },
+            {
+                "name": "MYSQL_DATABASE",
+                "value": "sampledb"
+            }
+        ],
+        "resources": {
+        },
+        "terminationMessagePath": "/dev/termination-log",
+        "imagePullPolicy": "IfNotPresent",
+        "capabilities": {},
+        "securityContext": {
+          "capabilities": {},
+          "privileged": false
+        }
+      }
+    ],
+    "restartPolicy": "Always",
+    "dnsPolicy": "ClusterFirst",
+    "serviceAccount": ""
+  },
+  "status": {}
+}

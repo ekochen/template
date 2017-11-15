@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gluster-claim-1
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+     requests:
+      storage: 1Gi
+  selector:
+    matchLabels:
+      pv-number: pv1
+

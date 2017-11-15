@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: tomcat-portalapi
+  xpaas: 1.2.0
+metadata:
+  annotations:
+    description: Application template for tomcat portalapi
+    iconClass: icon-tomcat
+    tags: tomcat,java,jboss,xpass
+    version: 1.2.0
+  creationTimestamp: null
+  name: tomcat-portalapi
+objects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: The web server's http port.
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    ports:
+    - port: 8080
+      targetPort: 8080
+    selector:
+      deploymentConfig: ${APPLICATION_NAME}
+- apiVersion: v1
+  id: ${APPLICATION_NAME}-http
+  kind: Route
+  metadata:
+    annotations:
+      description: Route for application's http service.
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    host: ${HOSTNAME_HTTP}
+    to:
+      name: ${APPLICATION_NAME}
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    replicas: ${replica}
+    selector:
+      deploymentConfig: ${APPLICATION_NAME}
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: ${APPLICATION_NAME}
+          deploymentConfig: ${APPLICATION_NAME}
+        name: ${APPLICATION_NAME}
+      spec:
+        nodeSelector:
+          case: cmcc
+        containers:
+        - image: ${IMAGE_NAME}
+          imagePullPolicy: Always
+          name: ${APPLICATION_NAME}
+          ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          env:
+          - name: WEB_PORT
+            value: ${WEB_PORT}
+    triggers:
+    - type: ConfigChange
+parameters:
+- description: The name for the application.
+  name: APPLICATION_NAME
+  required: true
+  value: tomcat-portalapi
+- description: 'Custom hostname for http service route.  Leave blank for default hostname,
+    e.g.: <application-name>-<project>.<default-domain-suffix>'
+  name: HOSTNAME_HTTP
+- description: deploy image name
+  name: IMAGE_NAME
+  required: true
+- description: WEB_PORT=8080
+  name: WEB_PORT
+- description: The number of Pods to create replcaia=1
+  name: replica

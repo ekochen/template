@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: wordpress-case14
+  xpaas: 1.2.0
+metadata:
+  annotations:
+    description: Application template for wordpress case14
+    iconClass: icon-wordpress
+    tags: wordpress,java,jboss,xpass
+    version: 1.2.0
+  creationTimestamp: null
+  name: wordpress-case14
+objects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: The web server's http port.
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    ports:
+    - port: 80
+      targetPort: 80
+    selector:
+      deploymentConfig: ${APPLICATION_NAME}
+- apiVersion: v1
+  id: ${APPLICATION_NAME}-http
+  kind: Route
+  metadata:
+    annotations:
+      description: Route for application's http service.
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    host: ${HOSTNAME_HTTP}
+    to:
+      name: ${APPLICATION_NAME}
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    replicas: ${REPLICA}
+    selector:
+      deploymentConfig: ${APPLICATION_NAME}
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: ${APPLICATION_NAME}
+          deploymentConfig: ${APPLICATION_NAME}
+        name: ${APPLICATION_NAME}
+      spec:
+        containers:
+        - env:
+          - name: DB_1_PORT_3306_TCP_ADDR
+            value: ${MYSQL_PORT_3306_TCP_ADDR}
+          - name: DB_1_PORT_3306_TCP_PORT
+            value: ${MYSQL_SERVICE_PORT_MYSQL}
+          - name: MYSQL_USER
+            value: ${MYSQL_USER}
+          - name: DB_PASSWORD
+            value: ${MYSQL_PASSWORD}
+          - name: DB_NAME
+            value: ${MYSQL_DATABASE}
+          image: ${IMAGE_NAME}
+          imagePullPolicy: Always
+          name: ${APPLICATION_NAME}
+          ports:
+          - containerPort: 80
+            name: http
+            protocol: TCP
+        nodeSelector:
+          case: cmcc
+    triggers:
+    - type: ConfigChange
+parameters:
+- description: The name for the application.
+  name: APPLICATION_NAME
+  required: true
+  value: wordpress-case14
+- description: 'Custom hostname for http service route.  Leave blank for default hostname,
+    e.g.: <application-name>-<project>.<default-domain-suffix>'
+  name: HOSTNAME_HTTP
+- description: deploy image name
+  name: IMAGE_NAME
+  required: true
+- description: WEB_PORT=8080
+  name: WEB_PORT
+- description: The number of Pods to create replicas-1
+  name: REPLICA
+- description: The IP of mysql
+  name: MYSQL_PORT_3306_TCP_ADDR
+- description: The port of mysql
+  name: MYSQL_SERVICE_PORT_MYSQL
+- description: The user of mysql
+  name: MYSQL_USER
+- description: The Database name of wordpress
+  name: MYSQL_DATABASE
+- description: The mysql password of mysql
+  name: MYSQL_PASSWORD

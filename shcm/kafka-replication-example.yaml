@@ -1,0 +1,187 @@
+apiVersion: v1
+kind: Template
+metadata:
+  annotations:
+    description: Kafka Replication Example
+    iconClass: icon-kafka
+    tags: replication
+  creationTimestamp: null
+  name: kafka-replication-example
+objects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      name: kafka-one
+    name: ${KAFKA_ONE_SERVICE_NAME}
+  spec:
+    portalIP: ""
+    ports:
+    - nodePort: 0
+      port: 9092
+      protocol: TCP
+      targetPort: 9092
+    selector:
+      name: kafka-one
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      name: kafka-two
+    name: ${KAFKA_TWO_SERVICE_NAME}
+  spec:
+    portalIP: ""
+    ports:
+    - nodePort: 0
+      port: 9092
+      protocol: TCP
+      targetPort: 9092
+    selector:
+      name: kafka-two
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      name: kafka-three
+    name: ${KAFKA_THREE_SERVICE_NAME}
+  spec:
+    portalIP: ""
+    ports:
+    - nodePort: 0
+      port: 9092
+      protocol: TCP
+      targetPort: 9092
+    selector:
+      name: kafka-three
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: kafka-one
+  spec:
+    replicas: 1
+    selector:
+      name: kafka-one
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          name: kafka-one
+      spec:
+        containers:
+        - env:
+          - name: KAFKA_HOST
+            value: ${KAFKA_ONE_SERVICE_NAME}
+          - name: KAFKA_PORT
+            value: ${KAFKA_PORT}
+          - name: ZOOKEEPER_CONNECT
+            value: ${ZOOKEEPER_CONNECT}
+          - name: KAFKA_ID
+            value: ${BROKER_ID_ONE}
+          image: registrya.example.com:5000/kafka-cluster
+          imagePullPolicy: IfNotPresent
+          name: kafka-one
+          ports:
+          - containerPort: 9092
+            protocol: TCP
+    triggers:
+    - type: ConfigChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: kafka-two
+  spec:
+    replicas: 1
+    selector:
+      name: kafka-two
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          name: kafka-two
+      spec:
+        containers:
+        - env:
+          - name: KAFKA_HOST
+            value: ${KAFKA_TWO_SERVICE_NAME}
+          - name: KAFKA_PORT
+            value: ${KAFKA_PORT}
+          - name: ZOOKEEPER_CONNECT
+            value: ${ZOOKEEPER_CONNECT}
+          - name: KAFKA_ID
+            value: ${BROKER_ID_TWO}
+          image: registrya.example.com:5000/kafka-cluster
+          imagePullPolicy: IfNotPresent
+          name: kafka-two
+          ports:
+          - containerPort: 9092
+            protocol: TCP
+    triggers:
+    - type: ConfigChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: kafka-three
+  spec:
+    replicas: 1
+    selector:
+      name: kafka-three
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          name: kafka-three
+      spec:
+        containers:
+        - env:
+          - name: KAFKA_HOST
+            value: ${KAFKA_THREE_SERVICE_NAME}
+          - name: KAFKA_PORT
+            value: ${KAFKA_PORT}
+          - name: ZOOKEEPER_CONNECT
+            value: ${ZOOKEEPER_CONNECT}
+          - name: KAFKA_ID
+            value: ${BROKER_ID_THREE}
+          image: registrya.example.com:5000/kafka-cluster
+          imagePullPolicy: IfNotPresent
+          name: kafka-three
+          ports:
+          - containerPort: 9092
+            protocol: TCP
+    triggers:
+    - type: ConfigChange
+parameters:
+- description: Service name the first kafka Pod
+  name: KAFKA_ONE_SERVICE_NAME
+  value: kafka-one-service-name
+- description: Service name the second kafka Pod
+  name: KAFKA_TWO_SERVICE_NAME
+  value: kafka-two-service-name
+- description: Service name the third kafka Pod
+  name: KAFKA_THREE_SERVICE_NAME
+  value: kafka-three-service-name
+- description: The default port of kafka 9092
+  name: KAFKA_PORT
+- description: The ZOOKEEPER_CONNECT 10.0.0.1:2181,10.0.0.2:2181,10.0.0.3:2181
+  name: ZOOKEEPER_CONNECT
+  value: 10.10.49.241:2181
+- description: BROKER_ID of the first kafka Pod deault is 0
+  name: BROKER_ID_ONE
+- description: BROKER_ID of the second kafka Pod deault is 1
+  name: BROKER_ID_TWO
+- description: BROKER_ID of the first kafka Pod deault is 2
+  name: BROKER_ID_THREE

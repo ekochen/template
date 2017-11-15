@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    openshift.io/scc: anyuid
+  creationTimestamp: null
+  labels:
+    name: gluster-pv-3
+  name: gluster-pv-3
+spec:
+  containers:
+  - env:
+    - name: MYSQL_USER
+      value: user28O
+    - name: MYSQL_PASSWORD
+      value: W3T07KAn25XCmjRy
+    - name: MYSQL_DATABASE
+      value: sampledb
+    image: registrya.example.com:5000/rhscl/mysql-56-rhel7:latest
+    imagePullPolicy: IfNotPresent
+    name: gluster-pv-3
+    ports:
+    - containerPort: 3306
+      name: port1
+      protocol: TCP
+    - containerPort: 3307
+      name: port2
+      protocol: TCP
+    resources: {}
+    securityContext:
+      capabilities:
+        drop:
+        - MKNOD
+        - SYS_CHROOT
+      privileged: true
+      seLinuxOptions:
+        level: s0:c8,c2
+    terminationMessagePath: /dev/termination-log
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-6cxc2
+      readOnly: true
+    - name: gluster-vol1
+      mountPath: /mnt
+      readOnly: false
+  dnsPolicy: ClusterFirst
+  host: nodea2.shcmcc.com
+  imagePullSecrets:
+  - name: default-dockercfg-do7je
+#  nodeName: nodea2.shcmcc.com
+  restartPolicy: Always
+  securityContext:
+    supplementalGroups: [500]
+    seLinuxOptions:
+      level: s0:c8,c2
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  volumes:
+  - name: default-token-6cxc2
+    secret:
+      secretName: default-token-6cxc2
+  - name: gluster-vol1
+    persistentVolumeClaim:
+      claimName: gluster-claim-3
+status:
+  phase: Pending
